@@ -47,7 +47,7 @@ const AdminBookings: React.FC = () => {
 		try {
 			setLoading(true);
 			const response = await fetch(
-				`http://localhost:3001/api/admin/bookings?page=${currentPage}&status=${statusFilter}&limit=10`,
+				`http://booking.brinkett.com.ng/api/admin/bookings?page=${currentPage}&status=${statusFilter}&limit=10`,
 				{ credentials: "include" }
 			);
 			const data: BookingsResponse = await response.json();
@@ -74,7 +74,7 @@ const AdminBookings: React.FC = () => {
 	) => {
 		try {
 			const response = await fetch(
-				`http://localhost:3001/api/admin/bookings/${bookingId}`,
+				`http://booking.brinkett.com.ng/api/admin/bookings/${bookingId}`,
 				{
 					method: "PUT",
 					headers: {
@@ -100,7 +100,7 @@ const AdminBookings: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				`http://localhost:3001/api/admin/bookings/${bookingId}`,
+				`http://booking.brinkett.com.ng/api/admin/bookings/${bookingId}`,
 				{
 					method: "DELETE",
 					credentials: "include",

@@ -33,7 +33,9 @@ const Home: React.FC = () => {
 
 	const fetchApartmentDetails = async () => {
 		try {
-			const response = await fetch("http://localhost:3001/api/apartment");
+			const response = await fetch(
+				"http://booking.brinkett.com.ng/api/apartment"
+			);
 			const data = await response.json();
 			setApartment(data);
 		} catch (error) {

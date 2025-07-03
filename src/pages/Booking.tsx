@@ -58,7 +58,9 @@ const Booking: React.FC = () => {
 
 	const fetchApartmentDetails = async () => {
 		try {
-			const response = await fetch("http://localhost:3001/api/apartment");
+			const response = await fetch(
+				"http://booking.brinkett.com.ng/api/apartment"
+			);
 			const data = await response.json();
 			setApartment(data);
 		} catch (error) {
@@ -69,7 +71,7 @@ const Booking: React.FC = () => {
 	const fetchAvailability = async () => {
 		try {
 			const response = await fetch(
-				"http://localhost:3001/api/bookings/availability"
+				"http://booking.brinkett.com.ng/api/bookings/availability"
 			);
 			const data = await response.json();
 			setUnavailableDates(data.unavailableDates || []);
@@ -150,13 +152,16 @@ const Booking: React.FC = () => {
 		setError("");
 
 		try {
-			const response = await fetch("http://localhost:3001/api/bookings", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(form),
-			});
+			const response = await fetch(
+				"http://booking.brinkett.com.ng/api/bookings",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(form),
+				}
+			);
 
 			const data = await response.json();
 

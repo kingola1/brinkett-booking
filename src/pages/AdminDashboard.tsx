@@ -49,12 +49,15 @@ const AdminDashboard: React.FC = () => {
 	const fetchDashboardData = async () => {
 		try {
 			const [statsResponse, bookingsResponse] = await Promise.all([
-				fetch("http://localhost:3001/api/admin/dashboard", {
+				fetch("http://booking.brinkett.com.ng/api/admin/dashboard", {
 					credentials: "include",
 				}),
-				fetch("http://localhost:3001/api/admin/bookings?limit=5", {
-					credentials: "include",
-				}),
+				fetch(
+					"http://booking.brinkett.com.ng/api/admin/bookings?limit=5",
+					{
+						credentials: "include",
+					}
+				),
 			]);
 
 			const statsData = await statsResponse.json();
