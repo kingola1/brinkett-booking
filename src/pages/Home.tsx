@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
 	MapPin,
@@ -26,10 +26,39 @@ interface Apartment {
 const Home: React.FC = () => {
 	const [apartment, setApartment] = useState<Apartment | null>(null);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
+	const [isPaused, setIsPaused] = useState(false);
+	const [touchStart, setTouchStart] = useState<number | null>(null);
+
+	const nextImage = useCallback(() => {
+		if (apartment) {
+			setCurrentImageIndex(
+				(prev) => (prev + 1) % apartment.photos.length
+			);
+		}
+	}, [apartment, currentImageIndex]);
+
+	const prevImage = useCallback(() => {
+		if (apartment) {
+			setCurrentImageIndex(
+				(prev) =>
+					(prev - 1 + apartment.photos.length) %
+					apartment.photos.length
+			);
+		}
+	}, [apartment, currentImageIndex]);
 
 	useEffect(() => {
 		fetchApartmentDetails();
 	}, []);
+
+	// Auto-play functionality
+	useEffect(() => {
+		if (!apartment || isPaused) return;
+
+		const interval = setInterval(nextImage, 5000); // Change image every 5 seconds
+
+		return () => clearInterval(interval);
+	}, [apartment, isPaused, nextImage]);
 
 	const fetchApartmentDetails = async () => {
 		try {
@@ -40,24 +69,6 @@ const Home: React.FC = () => {
 			setApartment(data);
 		} catch (error) {
 			console.error("Failed to fetch apartment details:", error);
-		}
-	};
-
-	const nextImage = () => {
-		if (apartment) {
-			setCurrentImageIndex(
-				(prev) => (prev + 1) % apartment.photos.length
-			);
-		}
-	};
-
-	const prevImage = () => {
-		if (apartment) {
-			setCurrentImageIndex(
-				(prev) =>
-					(prev - 1 + apartment.photos.length) %
-					apartment.photos.length
-			);
 		}
 	};
 
@@ -100,31 +111,59 @@ const Home: React.FC = () => {
 
 			{/* Hero Section */}
 			<section className="relative">
-				<div className="relative h-96 md:h-[500px] overflow-hidden">
+				<div
+					className="relative h-96 md:h-[500px] overflow-hidden"
+					onMouseEnter={() => setIsPaused(true)}
+					onMouseLeave={() => setIsPaused(false)}
+					onTouchStart={(e) => {
+						setIsPaused(true);
+						setTouchStart(e.touches[0].clientX);
+					}}
+					onTouchMove={(e) => {
+						if (touchStart === null || !apartment) return;
+
+						const currentTouch = e.touches[0].clientX;
+						const diff = touchStart - currentTouch;
+
+						// Threshold of 50px for swipe
+						if (Math.abs(diff) > 50) {
+							if (diff > 0) {
+								nextImage();
+							} else {
+								prevImage();
+							}
+							setTouchStart(null);
+						}
+					}}
+					onTouchEnd={() => {
+						setIsPaused(false);
+						setTouchStart(null);
+					}}
+				>
 					<img
 						src={apartment.photos[currentImageIndex]}
 						alt={apartment.name}
 						className="w-full h-full object-cover"
 					/>
-					<div className="absolute inset-0 bg-black bg-opacity-40"></div>
+					<div className="absolute inset-0 bg-black bg-opacity-40 z-0"></div>
 
 					{/* Image Navigation */}
 					<button
 						onClick={prevImage}
-						className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full transition-all"
+						className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full transition-all z-20 cursor-pointer"
 					>
 						<ArrowRight className="w-5 h-5 text-gray-800 rotate-180" />
 					</button>
 					<button
 						onClick={nextImage}
-						className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full transition-all"
+						className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full transition-all z-20 cursor-pointer"
 					>
 						<ArrowRight className="w-5 h-5 text-gray-800" />
 					</button>
 
 					{/* Hero Content */}
-					<div className="absolute inset-0 flex items-center justify-center">
-						<div className="text-center text-white max-w-4xl px-4">
+					<div className="absolute inset-0 flex items-center justify-center z-10">
+						<div className="text-center text-white max-w-4xl px-4 relative z-20">
 							<h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
 								{apartment.name}
 							</h1>
