@@ -78,8 +78,8 @@ export function initDatabase() {
 			name: "Carlton Court Apartment",
 			description:
 				"Experience ultimate luxury in our stunning penthouse suite featuring panoramic city views, premium amenities, and sophisticated design. This exclusive retreat offers the perfect blend of comfort and elegance for discerning guests.",
-			price_per_night: 450.0,
-			max_guests: 4,
+			price_per_night: 120000.0,
+			max_guests: 2,
 			amenities: JSON.stringify([
 				"King-size bed with premium linens",
 				"Panoramic city views",
@@ -93,10 +93,10 @@ export function initDatabase() {
 				"Parking space included",
 			]),
 			photos: JSON.stringify([
-				"https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
-				"https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg",
-				"https://images.pexels.com/photos/1571471/pexels-photo-1571471.jpeg",
-				"https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg",
+				"https://res.cloudinary.com/dcyxl8lta/image/upload/v1751370680/brinkett-apartment/IMG_2094_po9yhy.jpg",
+				"https://res.cloudinary.com/dcyxl8lta/image/upload/v1751370681/brinkett-apartment/IMG_2097_j0nekj.jpg",
+				"https://res.cloudinary.com/dcyxl8lta/image/upload/v1751369862/brinkett-apartment/IMG_3327_c5vmod.jpg",
+				"https://res.cloudinary.com/dcyxl8lta/image/upload/v1751370680/brinkett-apartment/IMG_2072_dmnb8n.jpg",
 			]),
 		};
 
