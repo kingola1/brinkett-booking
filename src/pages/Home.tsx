@@ -34,7 +34,7 @@ const Home: React.FC = () => {
 	const fetchApartmentDetails = async () => {
 		try {
 			const response = await fetch(
-				"http://booking.brinkett.com.ng/api/apartment"
+				"https://apartment.brinkett.com.ng/api/apartment"
 			);
 			const data = await response.json();
 			setApartment(data);

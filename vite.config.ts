@@ -10,7 +10,7 @@ export default defineConfig({
 	server: {
 		proxy: {
 			"/api": {
-				target: "http://booking.brinkett.com.ng",
+				target: "https://apartment.brinkett.com.ng",
 				changeOrigin: true,
 			},
 		},

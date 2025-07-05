@@ -33,7 +33,7 @@ const AdminSettings: React.FC = () => {
 	const fetchApartmentData = async () => {
 		try {
 			const response = await fetch(
-				"http://booking.brinkett.com.ng/api/apartment",
+				"https://apartment.brinkett.com.ng/api/apartment",
 				{
 					credentials: "include",
 				}
@@ -55,7 +55,7 @@ const AdminSettings: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				"http://booking.brinkett.com.ng/api/apartment",
+				"https://apartment.brinkett.com.ng/api/apartment",
 				{
 					method: "PUT",
 					headers: {

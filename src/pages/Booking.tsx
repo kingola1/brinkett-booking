@@ -59,7 +59,7 @@ const Booking: React.FC = () => {
 	const fetchApartmentDetails = async () => {
 		try {
 			const response = await fetch(
-				"http://booking.brinkett.com.ng/api/apartment"
+				"https://apartment.brinkett.com.ng/api/apartment"
 			);
 			const data = await response.json();
 			setApartment(data);
@@ -71,7 +71,7 @@ const Booking: React.FC = () => {
 	const fetchAvailability = async () => {
 		try {
 			const response = await fetch(
-				"http://booking.brinkett.com.ng/api/bookings/availability"
+				"https://apartment.brinkett.com.ng/api/bookings/availability"
 			);
 			const data = await response.json();
 			setUnavailableDates(data.unavailableDates || []);
@@ -153,7 +153,7 @@ const Booking: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				"http://booking.brinkett.com.ng/api/bookings",
+				"https://apartment.brinkett.com.ng/api/bookings",
 				{
 					method: "POST",
 					headers: {

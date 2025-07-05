@@ -52,11 +52,11 @@ const AdminCalendar: React.FC = () => {
 		try {
 			const [bookingsResponse, blockedResponse] = await Promise.all([
 				fetch(
-					"http://booking.brinkett.com.ng/api/admin/bookings?limit=all",
+					"https://apartment.brinkett.com.ng/api/admin/bookings?limit=all",
 					{ credentials: "include" }
 				),
 				fetch(
-					"http://booking.brinkett.com.ng/api/admin/blocked-dates",
+					"https://apartment.brinkett.com.ng/api/admin/blocked-dates",
 					{ credentials: "include" }
 				),
 			]);
@@ -78,7 +78,7 @@ const AdminCalendar: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				"http://booking.brinkett.com.ng/api/admin/blocked-dates",
+				"https://apartment.brinkett.com.ng/api/admin/blocked-dates",
 				{
 					method: "POST",
 					headers: {
@@ -106,7 +106,7 @@ const AdminCalendar: React.FC = () => {
 	const removeBlockedDate = async (id: number) => {
 		try {
 			const response = await fetch(
-				`http://booking.brinkett.com.ng/api/admin/blocked-dates/${id}`,
+				`https://apartment.brinkett.com.ng/api/admin/blocked-dates/${id}`,
 				{
 					method: "DELETE",
 					credentials: "include",

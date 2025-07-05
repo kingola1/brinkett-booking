@@ -35,7 +35,7 @@ const Confirmation: React.FC = () => {
 		const fetchBooking = async () => {
 			try {
 				const response = await fetch(
-					`http://booking.brinkett.com.ng/api/bookings/${id}`
+					`https://apartment.brinkett.com.ng/api/bookings/${id}`
 				);
 				const data = await response.json();
 
