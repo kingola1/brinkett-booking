@@ -262,7 +262,7 @@ const Confirmation: React.FC = () => {
 										)}
 									</p>
 									<p className="text-sm text-gray-500">
-										After 3:00 PM
+										After 2:00 PM
 									</p>
 								</div>
 							</div>
@@ -279,7 +279,7 @@ const Confirmation: React.FC = () => {
 										)}
 									</p>
 									<p className="text-sm text-gray-500">
-										Before 11:00 AM
+										Before 12:00 PM
 									</p>
 								</div>
 							</div>
@@ -315,8 +315,8 @@ const Confirmation: React.FC = () => {
 						Important Information
 					</h3>
 					<ul className="space-y-2 text-amber-700">
-						<li>• Check-in time: 3:00 PM - 10:00 PM</li>
-						<li>• Check-out time: 8:00 AM - 11:00 AM</li>
+						<li>• Check-in time: 2:00 PM - 10:00 PM</li>
+						<li>• Check-out time: 8:00 AM - 12:00 PM</li>
 						<li>
 							• Payment Details: GTBank Account 0163984462
 							(Oladayo Fagbemiro)
