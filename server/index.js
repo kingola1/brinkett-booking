@@ -21,7 +21,11 @@ initDatabase();
 // Middleware
 app.use(
 	cors({
-		origin: ["http://localhost:5173", "https://apartment.brinkett.com.ng"],
+		origin: [
+			"http://localhost:5173",
+			"http://localhost:5174",
+			"https://apartment.brinkett.com.ng",
+		],
 		credentials: true,
 	})
 );
