@@ -16,6 +16,9 @@ import {
 	isBefore,
 } from "date-fns";
 import { api } from "../utils/api";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { API_BASE_URL } from "../config/api";
 
 interface Apartment {
 	id: number;
@@ -158,8 +161,14 @@ const Booking: React.FC = () => {
 			} else {
 				setError(data.error || "Failed to create booking");
 			}
-		} catch (error) {
-			setError("Failed to create booking. Please try again.");
+		} catch (error: unknown) {
+			const errorMessage =
+				typeof error === "string"
+					? error
+					: error instanceof Error && error.message
+					? error.message
+					: "Failed to create booking. Please try again.";
+			setError(errorMessage);
 			console.error("Booking error:", error);
 		} finally {
 			setLoading(false);
@@ -179,6 +188,11 @@ const Booking: React.FC = () => {
 			? differenceInDays(parseISO(form.checkOut), parseISO(form.checkIn))
 			: 0;
 	const total = calculateTotal();
+
+	// Helper to convert yyyy-MM-dd to Date
+	function toDate(str: string) {
+		return str ? new Date(str + "T00:00:00") : null;
+	}
 
 	return (
 		<div className="min-h-screen bg-gray-50">
@@ -207,7 +221,19 @@ const Booking: React.FC = () => {
 					<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 						<div className="aspect-video overflow-hidden">
 							<img
-								src={apartment.photos[0]}
+								src={
+									Array.isArray(apartment.photos) &&
+									apartment.photos.length > 0
+										? apartment.photos[0].url.startsWith(
+												"/uploads/"
+										  )
+											? `${API_BASE_URL.replace(
+													/\/api$/,
+													""
+											  )}${apartment.photos[0].url}`
+											: apartment.photos[0].url
+										: "https://via.placeholder.com/800x600"
+								}
 								alt={apartment.name}
 								className="w-full h-full object-cover"
 							/>
@@ -337,16 +363,29 @@ const Booking: React.FC = () => {
 										<label className="block text-sm font-medium text-gray-700 mb-2">
 											Check-in Date *
 										</label>
-										<input
-											type="date"
-											name="checkIn"
-											value={form.checkIn}
-											onChange={handleInputChange}
-											required
-											min={format(
-												new Date(),
-												"yyyy-MM-dd"
+										<DatePicker
+											selected={
+												form.checkIn
+													? toDate(form.checkIn)
+													: null
+											}
+											onChange={(date) =>
+												setForm((f) => ({
+													...f,
+													checkIn: date
+														? format(
+																date,
+																"yyyy-MM-dd"
+														  )
+														: "",
+												}))
+											}
+											excludeDates={unavailableDates.map(
+												(date) => toDate(date)
 											)}
+											minDate={new Date()}
+											dateFormat="yyyy-MM-dd"
+											placeholderText="Select check-in date"
 											className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
 										/>
 									</div>
@@ -355,31 +394,38 @@ const Booking: React.FC = () => {
 										<label className="block text-sm font-medium text-gray-700 mb-2">
 											Check-out Date *
 										</label>
-										<input
-											type="date"
-											name="checkOut"
-											value={form.checkOut}
-											onChange={handleInputChange}
-											required
-											min={
-												form.checkIn
-													? format(
-															addDays(
-																parseISO(
-																	form.checkIn
-																),
-																1
-															),
-															"yyyy-MM-dd"
-													  )
-													: format(
-															addDays(
-																new Date(),
-																1
-															),
-															"yyyy-MM-dd"
-													  )
+										<DatePicker
+											selected={
+												form.checkOut
+													? toDate(form.checkOut)
+													: null
 											}
+											onChange={(date) =>
+												setForm((f) => ({
+													...f,
+													checkOut: date
+														? format(
+																date,
+																"yyyy-MM-dd"
+														  )
+														: "",
+												}))
+											}
+											excludeDates={unavailableDates.map(
+												(date) => toDate(date)
+											)}
+											minDate={
+												form.checkIn
+													? addDays(
+															toDate(
+																form.checkIn
+															)!,
+															1
+													  )
+													: addDays(new Date(), 1)
+											}
+											dateFormat="yyyy-MM-dd"
+											placeholderText="Select check-out date"
 											className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
 										/>
 									</div>
