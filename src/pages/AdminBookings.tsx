@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
 	Search,
 	Filter,
@@ -11,6 +11,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import AdminLayout from "../components/AdminLayout";
 import { format, parseISO } from "date-fns";
+import { api } from "../utils/api";
 
 interface Booking {
 	id: number;
@@ -26,13 +27,6 @@ interface Booking {
 	created_at: string;
 }
 
-interface BookingsResponse {
-	bookings: Booking[];
-	totalCount: number;
-	currentPage: number;
-	totalPages: number;
-}
-
 const AdminBookings: React.FC = () => {
 	const navigate = useNavigate();
 	const { isAuthenticated } = useAuth();
@@ -43,14 +37,17 @@ const AdminBookings: React.FC = () => {
 	const [statusFilter, setStatusFilter] = useState("all");
 	const [searchTerm, setSearchTerm] = useState("");
 
-	const fetchBookings = React.useCallback(async () => {
+	const fetchBookings = useCallback(async () => {
+		setLoading(true);
 		try {
-			setLoading(true);
-			const response = await fetch(
-				`https://apartment.brinkett.com.ng/api/admin/bookings?page=${currentPage}&status=${statusFilter}&limit=10`,
-				{ credentials: "include" }
-			);
-			const data: BookingsResponse = await response.json();
+			const params: Record<string, string | number | boolean> = {
+				page: currentPage,
+			};
+			if (statusFilter !== "all") params.status = statusFilter;
+			const data = await api.get("/admin/bookings", {
+				credentials: "include",
+				params,
+			});
 			setBookings(data.bookings || []);
 			setTotalPages(data.totalPages || 1);
 		} catch (error) {
@@ -68,26 +65,14 @@ const AdminBookings: React.FC = () => {
 		fetchBookings();
 	}, [isAuthenticated, navigate, fetchBookings]);
 
-	const updateBookingStatus = async (
-		bookingId: number,
-		newStatus: string
-	) => {
+	const handleUpdateStatus = async (bookingId: number, status: string) => {
 		try {
-			const response = await fetch(
-				`https://apartment.brinkett.com.ng/api/admin/bookings/${bookingId}`,
-				{
-					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					credentials: "include",
-					body: JSON.stringify({ status: newStatus }),
-				}
+			await api.patch(
+				`/admin/bookings/${bookingId}`,
+				{ status },
+				{ credentials: "include" }
 			);
-
-			if (response.ok) {
-				fetchBookings(); // Refresh the list
-			}
+			fetchBookings();
 		} catch (error) {
 			console.error("Failed to update booking status:", error);
 		}
@@ -99,17 +84,10 @@ const AdminBookings: React.FC = () => {
 		}
 
 		try {
-			const response = await fetch(
-				`https://apartment.brinkett.com.ng/api/admin/bookings/${bookingId}`,
-				{
-					method: "DELETE",
-					credentials: "include",
-				}
-			);
-
-			if (response.ok) {
-				fetchBookings(); // Refresh the list
-			}
+			await api.delete(`/admin/bookings/${bookingId}`, {
+				credentials: "include",
+			});
+			fetchBookings();
 		} catch (error) {
 			console.error("Failed to delete booking:", error);
 		}
@@ -190,9 +168,10 @@ const AdminBookings: React.FC = () => {
 								<Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
 								<select
 									value={statusFilter}
-									onChange={(e) =>
-										setStatusFilter(e.target.value)
-									}
+									onChange={(e) => {
+										setStatusFilter(e.target.value);
+										setCurrentPage(1);
+									}}
 									className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
 								>
 									<option value="all">All Bookings</option>
@@ -293,7 +272,7 @@ const AdminBookings: React.FC = () => {
 											<select
 												value={booking.status}
 												onChange={(e) =>
-													updateBookingStatus(
+													handleUpdateStatus(
 														booking.id,
 														e.target.value
 													)
@@ -315,19 +294,13 @@ const AdminBookings: React.FC = () => {
 										</td>
 										<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
 											<div className="flex items-center space-x-2">
-												<button
-													onClick={() => {
-														// View booking details logic
-														console.log(
-															"View booking:",
-															booking.id
-														);
-													}}
+												<Link
+													to={`/admin/bookings/${booking.id}`}
 													className="text-amber-600 hover:text-amber-700 p-1"
 													title="View Details"
 												>
 													<Eye className="w-4 h-4" />
-												</button>
+												</Link>
 												<button
 													onClick={() =>
 														deleteBooking(

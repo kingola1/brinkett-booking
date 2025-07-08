@@ -6,6 +6,8 @@ import {
 	Settings,
 	LogOut,
 	BookOpen,
+	Home,
+	Plus,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/brinkett-logo.png";
@@ -29,6 +31,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 		{ name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
 		{ name: "Bookings", href: "/admin/bookings", icon: BookOpen },
 		{ name: "Calendar", href: "/admin/calendar", icon: Calendar },
+		{ name: "Apartments", href: "/admin/apartments", icon: Home },
+		{ name: "Add Apartment", href: "/admin/add-apartment", icon: Plus },
 		{ name: "Settings", href: "/admin/settings", icon: Settings },
 	];
 

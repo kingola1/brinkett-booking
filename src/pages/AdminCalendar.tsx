@@ -14,6 +14,7 @@ import {
 	addMonths,
 	subMonths,
 } from "date-fns";
+import { api } from "../utils/api";
 
 interface Booking {
 	id: number;
@@ -49,23 +50,13 @@ const AdminCalendar: React.FC = () => {
 	}, [isAuthenticated, navigate, currentDate]);
 
 	const fetchCalendarData = async () => {
+		setLoading(true);
 		try {
-			const [bookingsResponse, blockedResponse] = await Promise.all([
-				fetch(
-					"https://apartment.brinkett.com.ng/api/admin/bookings?limit=all",
-					{ credentials: "include" }
-				),
-				fetch(
-					"https://apartment.brinkett.com.ng/api/admin/blocked-dates",
-					{ credentials: "include" }
-				),
-			]);
-
-			const bookingsData = await bookingsResponse.json();
-			const blockedData = await blockedResponse.json();
-
-			setBookings(bookingsData.bookings || []);
-			setBlockedDates(blockedData || []);
+			const data = await api.get("/admin/calendar", {
+				credentials: "include",
+			});
+			setBookings(data.bookings || []);
+			setBlockedDates(data.blockedDates || []);
 		} catch (error) {
 			console.error("Failed to fetch calendar data:", error);
 		} finally {
@@ -77,19 +68,13 @@ const AdminCalendar: React.FC = () => {
 		if (!selectedDate || !blockReason) return;
 
 		try {
-			const response = await fetch(
-				"https://apartment.brinkett.com.ng/api/admin/blocked-dates",
+			const response = await api.post(
+				"/admin/blocked-dates",
 				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					credentials: "include",
-					body: JSON.stringify({
-						date: selectedDate,
-						reason: blockReason,
-					}),
-				}
+					date: selectedDate,
+					reason: blockReason,
+				},
+				{ credentials: "include" }
 			);
 
 			if (response.ok) {
@@ -105,13 +90,9 @@ const AdminCalendar: React.FC = () => {
 
 	const removeBlockedDate = async (id: number) => {
 		try {
-			const response = await fetch(
-				`https://apartment.brinkett.com.ng/api/admin/blocked-dates/${id}`,
-				{
-					method: "DELETE",
-					credentials: "include",
-				}
-			);
+			const response = await api.delete(`/admin/blocked-dates/${id}`, {
+				credentials: "include",
+			});
 
 			if (response.ok) {
 				fetchCalendarData();

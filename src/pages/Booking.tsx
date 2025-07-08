@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
 	Users,
 	ArrowLeft,
@@ -15,6 +15,7 @@ import {
 	parseISO,
 	isBefore,
 } from "date-fns";
+import { api } from "../utils/api";
 
 interface Apartment {
 	id: number;
@@ -36,6 +37,7 @@ interface BookingForm {
 
 const Booking: React.FC = () => {
 	const navigate = useNavigate();
+	const { apartmentId } = useParams<{ apartmentId: string }>();
 	const [apartment, setApartment] = useState<Apartment | null>(null);
 	const [unavailableDates, setUnavailableDates] = useState<string[]>([]);
 	const [form, setForm] = useState<BookingForm>({
@@ -58,10 +60,7 @@ const Booking: React.FC = () => {
 
 	const fetchApartmentDetails = async () => {
 		try {
-			const response = await fetch(
-				"https://apartment.brinkett.com.ng/api/apartment"
-			);
-			const data = await response.json();
+			const data = await api.get(`/apartment/${apartmentId}`);
 			setApartment(data);
 		} catch (error) {
 			console.error("Failed to fetch apartment details:", error);
@@ -70,10 +69,7 @@ const Booking: React.FC = () => {
 
 	const fetchAvailability = async () => {
 		try {
-			const response = await fetch(
-				"https://apartment.brinkett.com.ng/api/bookings/availability"
-			);
-			const data = await response.json();
+			const data = await api.get(`/bookings/availability/${apartmentId}`);
 			setUnavailableDates(data.unavailableDates || []);
 		} catch (error) {
 			console.error("Failed to fetch availability:", error);
@@ -152,18 +148,10 @@ const Booking: React.FC = () => {
 		setError("");
 
 		try {
-			const response = await fetch(
-				"https://apartment.brinkett.com.ng/api/bookings",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(form),
-				}
-			);
-
-			const data = await response.json();
+			const data = await api.post("/bookings", {
+				...form,
+				apartmentId: Number(apartmentId),
+			});
 
 			if (data.success) {
 				navigate(`/confirmation/${data.bookingId}`);
@@ -199,7 +187,7 @@ const Booking: React.FC = () => {
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex items-center justify-between py-6">
 						<Link
-							to="/"
+							to={`/apartments/${apartmentId}`}
 							className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
 						>
 							<ArrowLeft className="w-5 h-5" />

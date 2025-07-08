@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
 	Calendar,
 	Users,
@@ -12,6 +12,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import AdminLayout from "../components/AdminLayout";
 import { format, parseISO } from "date-fns";
+import { api } from "../utils/api";
 
 interface DashboardStats {
 	totalBookings: number;
@@ -48,21 +49,13 @@ const AdminDashboard: React.FC = () => {
 
 	const fetchDashboardData = async () => {
 		try {
-			const [statsResponse, bookingsResponse] = await Promise.all([
-				fetch("https://apartment.brinkett.com.ng/api/admin/dashboard", {
+			const [statsData, bookingsData] = await Promise.all([
+				api.get("/admin/dashboard", { credentials: "include" }),
+				api.get("/admin/bookings", {
 					credentials: "include",
+					params: { limit: 5 },
 				}),
-				fetch(
-					"https://apartment.brinkett.com.ng/api/admin/bookings?limit=5",
-					{
-						credentials: "include",
-					}
-				),
 			]);
-
-			const statsData = await statsResponse.json();
-			const bookingsData = await bookingsResponse.json();
-
 			setStats(statsData);
 			setRecentBookings(bookingsData.bookings || []);
 		} catch (error) {
@@ -280,6 +273,21 @@ const AdminDashboard: React.FC = () => {
 							<p className="text-gray-500">No bookings found</p>
 						</div>
 					)}
+				</div>
+
+				<div className="flex items-center space-x-4">
+					<Link
+						to="/admin/add-apartment"
+						className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+					>
+						Add Apartment
+					</Link>
+					<Link
+						to="/admin/apartments"
+						className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+					>
+						View Apartments
+					</Link>
 				</div>
 			</div>
 		</AdminLayout>

@@ -10,6 +10,7 @@ import {
 	Download,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { api } from "../utils/api";
 
 interface Booking {
 	id: number;
@@ -26,7 +27,7 @@ interface Booking {
 }
 
 const Confirmation: React.FC = () => {
-	const { id } = useParams<{ id: string }>();
+	const { bookingId } = useParams<{ bookingId: string }>();
 	const [booking, setBooking] = useState<Booking | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
@@ -34,28 +35,20 @@ const Confirmation: React.FC = () => {
 	useEffect(() => {
 		const fetchBooking = async () => {
 			try {
-				const response = await fetch(
-					`https://apartment.brinkett.com.ng/api/bookings/${id}`
-				);
-				const data = await response.json();
-
-				if (response.ok) {
-					setBooking(data);
-				} else {
-					setError(data.error || "Booking not found");
-				}
+				const data = await api.get(`/bookings/${bookingId}`);
+				setBooking(data);
 			} catch (error) {
+				setError("Failed to load booking details.");
 				console.error("Failed to fetch booking:", error);
-				setError("Failed to fetch booking details");
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		if (id) {
+		if (bookingId) {
 			fetchBooking();
 		}
-	}, [id]);
+	}, [bookingId]);
 
 	if (loading) {
 		return (

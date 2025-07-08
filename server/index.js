@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.js";
 import bookingRoutes from "./routes/bookings.js";
 import adminRoutes from "./routes/admin.js";
 import apartmentRoutes from "./routes/apartment.js";
+import path from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -53,7 +54,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/apartment", apartmentRoutes);
 
 // Static files
-app.use("/uploads", express.static(join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);

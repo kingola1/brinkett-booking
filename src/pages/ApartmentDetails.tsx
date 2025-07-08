@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
 	MapPin,
 	Wifi,
@@ -11,23 +11,33 @@ import {
 	Star,
 	Calendar,
 	ArrowRight,
+	ArrowLeft,
 } from "lucide-react";
-import logo from "../assets/brinkett-logo.png"; // Adjust the path as necessary
+import logo from "../assets/brinkett-logo.png";
+import { api } from "../utils/api";
+import { API_BASE_URL } from "../config/api";
+
+interface Photo {
+	id: number;
+	url: string;
+	is_primary: boolean;
+}
+
 interface Apartment {
 	id: number;
 	name: string;
 	description: string;
+	location: string;
 	price_per_night: number;
 	max_guests: number;
 	amenities: string[];
-	photos: string[];
+	photos: Photo[];
 }
 
-const Home: React.FC = () => {
+const ApartmentDetails: React.FC = () => {
+	const { id } = useParams<{ id: string }>();
 	const [apartment, setApartment] = useState<Apartment | null>(null);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
-	const [isPaused, setIsPaused] = useState(false);
-	const [touchStart, setTouchStart] = useState<number | null>(null);
 
 	const nextImage = useCallback(() => {
 		if (apartment) {
@@ -35,7 +45,7 @@ const Home: React.FC = () => {
 				(prev) => (prev + 1) % apartment.photos.length
 			);
 		}
-	}, [apartment, currentImageIndex]);
+	}, [apartment]);
 
 	const prevImage = useCallback(() => {
 		if (apartment) {
@@ -45,27 +55,22 @@ const Home: React.FC = () => {
 					apartment.photos.length
 			);
 		}
-	}, [apartment, currentImageIndex]);
+	}, [apartment]);
 
 	useEffect(() => {
 		fetchApartmentDetails();
-	}, []);
+	}, [id]);
 
-	// Auto-play functionality
 	useEffect(() => {
-		if (!apartment || isPaused) return;
+		if (!apartment) return;
 
-		const interval = setInterval(nextImage, 5000); // Change image every 5 seconds
-
+		const interval = setInterval(nextImage, 5000);
 		return () => clearInterval(interval);
-	}, [apartment, isPaused, nextImage]);
+	}, [apartment, nextImage]);
 
 	const fetchApartmentDetails = async () => {
 		try {
-			const response = await fetch(
-				"https://apartment.brinkett.com.ng/api/apartment"
-			);
-			const data = await response.json();
+			const data = await api.get(`/apartment/${id}`);
 			setApartment(data);
 		} catch (error) {
 			console.error("Failed to fetch apartment details:", error);
@@ -86,7 +91,7 @@ const Home: React.FC = () => {
 			<header className="bg-white shadow-sm border-b border-gray-200">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex justify-between items-center py-6">
-						<div className="flex items-center space-x-3">
+						<Link to="/" className="flex items-center space-x-3">
 							<div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center">
 								<img src={logo} alt="Brinkett Logo" />
 							</div>
@@ -95,124 +100,113 @@ const Home: React.FC = () => {
 									Brinkett
 								</h1>
 								<p className="text-sm text-gray-600">
-									Management & Property Agency
+									Luxury Apartments
 								</p>
 							</div>
-						</div>
-						<Link
-							to="/admin"
-							className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
-						>
-							Admin Login
 						</Link>
+						<div className="flex items-center space-x-6">
+							<Link
+								to="/apartments"
+								className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+							>
+								View All Apartments
+							</Link>
+							<Link
+								to="/admin"
+								className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+							>
+								Admin Login
+							</Link>
+						</div>
 					</div>
 				</div>
 			</header>
 
 			{/* Hero Section */}
 			<section className="relative">
-				<div
-					className="relative h-96 md:h-[500px] overflow-hidden"
-					onMouseEnter={() => setIsPaused(true)}
-					onMouseLeave={() => setIsPaused(false)}
-					onTouchStart={(e) => {
-						setIsPaused(true);
-						setTouchStart(e.touches[0].clientX);
-					}}
-					onTouchMove={(e) => {
-						if (touchStart === null || !apartment) return;
-
-						const currentTouch = e.touches[0].clientX;
-						const diff = touchStart - currentTouch;
-
-						// Threshold of 50px for swipe
-						if (Math.abs(diff) > 50) {
-							if (diff > 0) {
-								nextImage();
-							} else {
-								prevImage();
-							}
-							setTouchStart(null);
-						}
-					}}
-					onTouchEnd={() => {
-						setIsPaused(false);
-						setTouchStart(null);
-					}}
-				>
+				<div className="relative h-96 md:h-[500px] overflow-hidden">
 					<img
-						src={apartment.photos[currentImageIndex]}
+						src={
+							apartment.photos[currentImageIndex].url.startsWith(
+								"/uploads/"
+							)
+								? `${API_BASE_URL.replace(/\/api$/, "")}${
+										apartment.photos[currentImageIndex].url
+								  }`
+								: apartment.photos[currentImageIndex].url
+						}
 						alt={apartment.name}
 						className="w-full h-full object-cover"
 					/>
 					<div className="absolute inset-0 bg-black bg-opacity-40 z-0"></div>
 
-					{/* Image Navigation */}
+					{/* Navigation */}
 					<button
 						onClick={prevImage}
 						className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full transition-all z-20 cursor-pointer"
+						aria-label="Previous image"
 					>
-						<ArrowRight className="w-5 h-5 text-gray-800 rotate-180" />
+						<ArrowLeft className="w-5 h-5 text-gray-800" />
 					</button>
 					<button
 						onClick={nextImage}
 						className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full transition-all z-20 cursor-pointer"
+						aria-label="Next image"
 					>
 						<ArrowRight className="w-5 h-5 text-gray-800" />
 					</button>
 
-					{/* Hero Content */}
-					<div className="absolute inset-0 flex items-center justify-center z-10">
-						<div className="text-center text-white max-w-4xl px-4 relative z-20">
-							<h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-								{apartment.name}
-							</h1>
-							<p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">
-								Experience ultimate luxury with breathtaking
-								views and premium amenities
-							</p>
-							<div className="flex items-center justify-center space-x-6 mb-8">
-								<div className="flex items-center space-x-2">
-									<Star className="w-5 h-5 text-amber-400 fill-current" />
-									<span className="font-semibold">
-										5.0 Rating
-									</span>
-								</div>
-								<div className="flex items-center space-x-2">
-									<Users className="w-5 h-5" />
-									<span>
-										Up to {apartment.max_guests} guests
-									</span>
-								</div>
-								<div className="flex items-center space-x-2">
-									<MapPin className="w-5 h-5" />
-									<span>Katampe, Abuja</span>
-								</div>
-							</div>
-							<Link
-								to="/booking"
-								className="inline-flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
-							>
-								<Calendar className="w-5 h-5" />
-								<span>Book Now</span>
-							</Link>
-						</div>
+					{/* Indicators */}
+					<div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+						{apartment.photos.map((_, index) => (
+							<button
+								key={index}
+								onClick={() => setCurrentImageIndex(index)}
+								className={`w-3 h-3 rounded-full transition-all ${
+									index === currentImageIndex
+										? "bg-white"
+										: "bg-white bg-opacity-50"
+								}`}
+								aria-label={`Go to image ${index + 1}`}
+							/>
+						))}
 					</div>
 				</div>
 
-				{/* Image Indicators */}
-				<div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-					{apartment.photos.map((_, index) => (
-						<button
-							key={index}
-							onClick={() => setCurrentImageIndex(index)}
-							className={`w-3 h-3 rounded-full transition-all ${
-								index === currentImageIndex
-									? "bg-white"
-									: "bg-white bg-opacity-50"
-							}`}
-						/>
-					))}
+				{/* Hero Content */}
+				<div className="absolute inset-0 flex items-center justify-center z-10">
+					<div className="text-center text-white max-w-4xl px-4 relative z-20">
+						<h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+							{apartment.name}
+						</h1>
+						<p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">
+							Experience ultimate luxury with breathtaking views
+							and premium amenities
+						</p>
+						<div className="flex items-center justify-center space-x-6 mb-8">
+							<div className="flex items-center space-x-2">
+								<Star className="w-5 h-5 text-amber-400 fill-current" />
+								<span className="font-semibold">
+									5.0 Rating
+								</span>
+							</div>
+							<div className="flex items-center space-x-2">
+								<Users className="w-5 h-5" />
+								<span>Up to {apartment.max_guests} guests</span>
+							</div>
+							<div className="flex items-center space-x-2">
+								<MapPin className="w-5 h-5" />
+								<span>{apartment.location}</span>
+							</div>
+						</div>
+						<Link
+							to={`/booking/${apartment.id}`}
+							className="inline-flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
+						>
+							<Calendar className="w-5 h-5" />
+							<span>Book Now</span>
+						</Link>
+					</div>
 				</div>
 			</section>
 
@@ -234,14 +228,15 @@ const Home: React.FC = () => {
 											Starting from
 										</p>
 										<p className="text-3xl font-bold text-amber-700">
-											₦{apartment.price_per_night}
+											₦
+											{apartment.price_per_night.toLocaleString()}
 											<span className="text-lg font-normal text-gray-600">
 												/night
 											</span>
 										</p>
 									</div>
 									<Link
-										to="/booking"
+										to={`/booking/${apartment.id}`}
 										className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
 									>
 										Check Availability
@@ -252,14 +247,23 @@ const Home: React.FC = () => {
 
 						<div className="grid grid-cols-2 gap-4">
 							{apartment.photos
-								.slice(1, 5)
+								.slice(0, 4)
 								.map((photo, index) => (
 									<div
 										key={index}
 										className="aspect-square overflow-hidden rounded-xl"
 									>
 										<img
-											src={photo}
+											src={
+												photo.url.startsWith(
+													"/uploads/"
+												)
+													? `${API_BASE_URL.replace(
+															/\/api$/,
+															""
+													  )}${photo.url}`
+													: photo.url
+											}
 											alt={`${apartment.name} ${
 												index + 1
 											}`}
@@ -337,7 +341,7 @@ const Home: React.FC = () => {
 						elegance
 					</p>
 					<Link
-						to="/booking"
+						to={`/booking/${apartment.id}`}
 						className="inline-flex items-center space-x-2 bg-white text-amber-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-colors shadow-lg"
 					>
 						<Calendar className="w-5 h-5" />
@@ -391,4 +395,4 @@ const Home: React.FC = () => {
 	);
 };
 
-export default Home;
+export default ApartmentDetails;

@@ -10,7 +10,8 @@ export default defineConfig({
 	server: {
 		proxy: {
 			"/api": {
-				target: "https://apartment.brinkett.com.ng",
+				// target: "https://apartment.brinkett.com.ng",
+				target: "http://localhost:3001",
 				changeOrigin: true,
 			},
 		},

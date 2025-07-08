@@ -135,6 +135,23 @@ router.get("/bookings", requireAuth, (req, res) => {
 	}
 });
 
+// Get single booking by id
+router.get("/bookings/:id", requireAuth, (req, res) => {
+	try {
+		const { id } = req.params;
+		const booking = db
+			.prepare("SELECT * FROM bookings WHERE id = ?")
+			.get(id);
+		if (!booking) {
+			return res.status(404).json({ error: "Booking not found" });
+		}
+		res.json(booking);
+	} catch (error) {
+		console.error("Get booking by id error:", error);
+		res.status(500).json({ error: "Failed to fetch booking" });
+	}
+});
+
 // Update booking status
 router.put("/bookings/:id", requireAuth, (req, res) => {
 	try {
@@ -225,6 +242,135 @@ router.delete("/blocked-dates/:id", requireAuth, (req, res) => {
 	} catch (error) {
 		console.error("Remove blocked date error:", error);
 		res.status(500).json({ error: "Failed to remove blocked date" });
+	}
+});
+
+// GET /admin/settings - fetch the first apartment's settings
+router.get("/settings", requireAuth, (req, res) => {
+	try {
+		const apartment = db
+			.prepare(
+				`
+			SELECT a.*,
+				json_group_array(json_object(
+					'id', ap.id,
+					'url', ap.photo_url,
+					'is_primary', ap.is_primary
+				)) as photos
+			FROM apartment a
+			LEFT JOIN apartment_photos ap ON a.id = ap.apartment_id
+			GROUP BY a.id
+			LIMIT 1
+		`
+			)
+			.get();
+		if (!apartment) {
+			return res.status(404).json({ error: "No apartment found" });
+		}
+		apartment.amenities = JSON.parse(apartment.amenities || "[]");
+		apartment.photos = JSON.parse(apartment.photos || "[]");
+		res.json(apartment);
+	} catch (error) {
+		console.error("Get settings error:", error);
+		res.status(500).json({ error: "Failed to fetch settings" });
+	}
+});
+
+// PUT /admin/settings - update the first apartment's settings
+router.put("/settings", requireAuth, (req, res) => {
+	try {
+		const {
+			name,
+			description,
+			location,
+			price_per_night,
+			max_guests,
+			amenities,
+		} = req.body;
+		// Get the first apartment's id
+		const apartment = db.prepare("SELECT id FROM apartment LIMIT 1").get();
+		if (!apartment) {
+			return res.status(404).json({ error: "No apartment found" });
+		}
+		db.prepare(
+			`
+			UPDATE apartment
+			SET name = ?, description = ?, location = ?, price_per_night = ?, max_guests = ?, amenities = ?
+			WHERE id = ?
+		`
+		).run(
+			name,
+			description,
+			location,
+			price_per_night,
+			max_guests,
+			JSON.stringify(amenities),
+			apartment.id
+		);
+		res.json({ success: true });
+	} catch (error) {
+		console.error("Update settings error:", error);
+		res.status(500).json({ error: "Failed to update settings" });
+	}
+});
+
+// GET /admin/global-settings - fetch all global settings
+router.get("/global-settings", requireAuth, (req, res) => {
+	try {
+		const settings = db.prepare("SELECT key, value FROM settings").all();
+		const result = {};
+		settings.forEach((s) => {
+			result[s.key] = s.value;
+		});
+		res.json(result);
+	} catch (error) {
+		console.error("Get global settings error:", error);
+		res.status(500).json({ error: "Failed to fetch settings" });
+	}
+});
+
+// PUT /admin/global-settings - update global settings
+router.put("/global-settings", requireAuth, (req, res) => {
+	try {
+		const updates = req.body;
+		const stmt = db.prepare("UPDATE settings SET value = ? WHERE key = ?");
+		for (const key in updates) {
+			stmt.run(updates[key], key);
+		}
+		res.json({ success: true });
+	} catch (error) {
+		console.error("Update global settings error:", error);
+		res.status(500).json({ error: "Failed to update settings" });
+	}
+});
+
+// GET /admin/calendar - bookings and blocked dates for calendar view
+router.get("/calendar", requireAuth, (req, res) => {
+	try {
+		const now = new Date();
+		const month = req.query.month
+			? parseInt(req.query.month)
+			: now.getMonth() + 1;
+		const year = req.query.year
+			? parseInt(req.query.year)
+			: now.getFullYear();
+		const monthStr = month.toString().padStart(2, "0");
+		const start = `${year}-${monthStr}-01`;
+		const end = `${year}-${monthStr}-31`;
+		const bookings = db
+			.prepare(
+				`SELECT id, guest_name, check_in, check_out, status FROM bookings WHERE check_in <= ? AND check_out >= ?`
+			)
+			.all(end, start);
+		const blockedDates = db
+			.prepare(
+				`SELECT id, date, reason FROM blocked_dates WHERE date >= ? AND date <= ?`
+			)
+			.all(start, end);
+		res.json({ bookings, blockedDates });
+	} catch (error) {
+		console.error("Calendar fetch error:", error);
+		res.status(500).json({ error: "Failed to fetch calendar data" });
 	}
 });
 
