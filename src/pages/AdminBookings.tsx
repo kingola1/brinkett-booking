@@ -25,6 +25,9 @@ interface Booking {
 	status: string;
 	special_requests: string;
 	created_at: string;
+	apartment_id?: number;
+	apartment_name?: string;
+	apartment_location?: string;
 }
 
 const AdminBookings: React.FC = () => {
@@ -203,6 +206,9 @@ const AdminBookings: React.FC = () => {
 										Booking ID
 									</th>
 									<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+										Apartment
+									</th>
+									<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 										Guest
 									</th>
 									<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -236,6 +242,14 @@ const AdminBookings: React.FC = () => {
 											{booking.id
 												.toString()
 												.padStart(6, "0")}
+										</td>
+										<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+											{booking.apartment_name || "-"}
+											{booking.apartment_location ? (
+												<div className="text-xs text-gray-500">
+													{booking.apartment_location}
+												</div>
+											) : null}
 										</td>
 										<td className="px-6 py-4 whitespace-nowrap">
 											<div>

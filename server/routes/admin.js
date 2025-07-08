@@ -99,15 +99,15 @@ router.get("/dashboard", requireAuth, (req, res) => {
 router.get("/bookings", requireAuth, (req, res) => {
 	try {
 		const { status, page = 1, limit = 10 } = req.query;
-		let query = "SELECT * FROM bookings";
+		let query = `SELECT b.*, a.name as apartment_name, a.location as apartment_location, a.price_per_night as apartment_price_per_night FROM bookings b LEFT JOIN apartment a ON b.apartment_id = a.id`;
 		let params = [];
 
 		if (status && status !== "all") {
-			query += " WHERE status = ?";
+			query += " WHERE b.status = ?";
 			params.push(status);
 		}
 
-		query += " ORDER BY created_at DESC";
+		query += " ORDER BY b.created_at DESC";
 
 		if (limit !== "all") {
 			const offset = (page - 1) * limit;
@@ -140,7 +140,9 @@ router.get("/bookings/:id", requireAuth, (req, res) => {
 	try {
 		const { id } = req.params;
 		const booking = db
-			.prepare("SELECT * FROM bookings WHERE id = ?")
+			.prepare(
+				`SELECT b.*, a.name as apartment_name, a.location as apartment_location, a.price_per_night as apartment_price_per_night FROM bookings b LEFT JOIN apartment a ON b.apartment_id = a.id WHERE b.id = ?`
+			)
 			.get(id);
 		if (!booking) {
 			return res.status(404).json({ error: "Booking not found" });

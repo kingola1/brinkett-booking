@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
 	Calendar,
 	Users,
@@ -204,9 +204,9 @@ const AdminDashboard: React.FC = () => {
 									<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 										Status
 									</th>
-									<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+									{/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 										Actions
-									</th>
+									</th> */}
 								</tr>
 							</thead>
 							<tbody className="bg-white divide-y divide-gray-200">
@@ -249,7 +249,7 @@ const AdminDashboard: React.FC = () => {
 												{booking.status}
 											</span>
 										</td>
-										<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+										{/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
 											<div className="flex items-center space-x-2">
 												<button className="text-amber-600 hover:text-amber-700">
 													<Eye className="w-4 h-4" />
@@ -261,7 +261,7 @@ const AdminDashboard: React.FC = () => {
 													<Trash2 className="w-4 h-4" />
 												</button>
 											</div>
-										</td>
+										</td> */}
 									</tr>
 								))}
 							</tbody>
@@ -273,21 +273,6 @@ const AdminDashboard: React.FC = () => {
 							<p className="text-gray-500">No bookings found</p>
 						</div>
 					)}
-				</div>
-
-				<div className="flex items-center space-x-4">
-					<Link
-						to="/admin/add-apartment"
-						className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-					>
-						Add Apartment
-					</Link>
-					<Link
-						to="/admin/apartments"
-						className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-					>
-						View Apartments
-					</Link>
 				</div>
 			</div>
 		</AdminLayout>

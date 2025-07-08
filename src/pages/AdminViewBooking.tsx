@@ -6,6 +6,9 @@ import { api } from "../utils/api";
 interface Booking {
 	id: number;
 	apartment_id: number;
+	apartment_name?: string;
+	apartment_location?: string;
+	apartment_price_per_night?: number;
 	guest_name: string;
 	guest_email: string;
 	guest_phone: string;
@@ -80,7 +83,13 @@ export default function AdminViewBooking() {
 						<strong>Booking ID:</strong> #{booking.id}
 					</div>
 					<div>
-						<strong>Apartment ID:</strong> {booking.apartment_id}
+						<strong>Apartment:</strong>{" "}
+						{booking.apartment_name || `#${booking.apartment_id}`}
+						{booking.apartment_location ? (
+							<span className="ml-2 text-gray-500">
+								({booking.apartment_location})
+							</span>
+						) : null}
 					</div>
 					<div>
 						<strong>Guest Name:</strong> {booking.guest_name}

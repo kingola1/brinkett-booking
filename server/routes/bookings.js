@@ -60,6 +60,42 @@ router.get("/availability", (req, res) => {
 	}
 });
 
+// Get unavailable dates for a specific apartment
+router.get("/availability/:apartmentId", (req, res) => {
+	try {
+		const { apartmentId } = req.params;
+		// Get all booked dates for this apartment
+		const bookedDates = db
+			.prepare(
+				`SELECT check_in, check_out FROM bookings WHERE status = 'confirmed' AND apartment_id = ? AND check_out > date('now')`
+			)
+			.all(apartmentId);
+		// Get blocked dates
+		const blockedDates = db
+			.prepare(`SELECT date FROM blocked_dates WHERE date >= date('now')`)
+			.all();
+		const unavailableDates = new Set();
+		// Add booked date ranges
+		bookedDates.forEach((booking) => {
+			const dates = eachDayOfInterval({
+				start: parseISO(booking.check_in),
+				end: parseISO(booking.check_out),
+			});
+			dates.forEach((date) => {
+				unavailableDates.add(format(date, "yyyy-MM-dd"));
+			});
+		});
+		// Add blocked dates
+		blockedDates.forEach((blocked) => {
+			unavailableDates.add(blocked.date);
+		});
+		res.json({ unavailableDates: Array.from(unavailableDates) });
+	} catch (error) {
+		console.error("Availability error:", error);
+		res.status(500).json({ error: "Failed to fetch availability" });
+	}
+});
+
 // Create booking
 router.post("/", (req, res) => {
 	try {
