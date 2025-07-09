@@ -11,11 +11,11 @@ const Landing: React.FC = () => {
 				<div className="absolute inset-0 bg-black opacity-50"></div>
 				<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
 					<div className="flex justify-center mb-8">
-						<div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center">
+						<div className="w-32 h-32 rounded-xl flex items-center justify-center">
 							<img
 								src={logo}
 								alt="Brinkett Logo"
-								className="w-12 h-12"
+								className="w-32 h-32"
 							/>
 						</div>
 					</div>
