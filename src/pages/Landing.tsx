@@ -2,33 +2,44 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Building, Star, Shield, Phone } from "lucide-react";
 import logo from "../assets/brinkett-logo.png";
+import heroImage from "../assets/hero.jpeg";
 
 const Landing: React.FC = () => {
 	return (
 		<div className="min-h-screen bg-white">
 			{/* Hero Section */}
-			<div className="relative bg-gradient-to-r from-amber-600 to-amber-700">
-				<div className="absolute inset-0 bg-black opacity-50"></div>
+			<div
+				className="relative"
+				style={{
+					backgroundImage: `url(${heroImage})`,
+					backgroundSize: "cover",
+					backgroundPosition: "center",
+				}}
+			>
+				<div className="absolute inset-0 bg-black opacity-70" />
 				<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
 					<div className="flex justify-center mb-8">
 						<div className="w-32 h-32 rounded-xl flex items-center justify-center">
 							<img
 								src={logo}
 								alt="Brinkett Logo"
-								className="w-32 h-32"
+								className="w-full h-[120px]"
 							/>
 						</div>
 					</div>
 					<h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
 						Welcome to Brinkett Properties
 					</h1>
-					<p className="text-xl md:text-2xl text-amber-100 mb-12 max-w-3xl mx-auto">
+					<p className="text-xl md:text-2xl text-amber-100 mb-2 max-w-3xl mx-auto">
 						Discover luxury living in the heart of Abuja. Premium
 						apartments curated for your comfort and style.
 					</p>
+					<p className="text-sm md:text-base text-amber-100 mb-12 max-w-3xl mx-auto italic">
+						Stay Smart, Stay Sylish
+					</p>
 					<Link
 						to="/apartments"
-						className="inline-flex items-center space-x-2 bg-white text-amber-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-colors shadow-lg"
+						className="inline-flex items-center space-x-2 bg-white text-amber-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-amber-700 hover:text-white transition-colors shadow-lg"
 					>
 						<span>View Our Apartments</span>
 						<ArrowRight className="w-5 h-5" />
