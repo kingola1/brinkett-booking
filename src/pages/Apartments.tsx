@@ -14,7 +14,6 @@ interface Apartment {
 	max_guests: number;
 	primary_photo: string | null;
 	amenities: string[];
-	photos: { url: string }[];
 }
 
 const Apartments: React.FC = () => {
@@ -116,27 +115,20 @@ const Apartments: React.FC = () => {
 							<div className="relative h-64">
 								<img
 									src={
-										Array.isArray(apartment.photos) &&
-										apartment.photos.length > 0
-											? apartment.photos[0].url.startsWith(
+										apartment.primary_photo
+											? apartment.primary_photo.startsWith(
 													"/uploads/"
 											  )
 												? `${API_BASE_URL.replace(
 														/\/api$/,
 														""
-												  )}${apartment.photos[0].url}`
-												: apartment.photos[0].url
+												  )}${apartment.primary_photo}`
+												: apartment.primary_photo
 											: "https://via.placeholder.com/800x600"
 									}
 									alt={apartment.name}
 									className="w-full h-full object-cover"
 								/>
-								{Array.isArray(apartment.photos) &&
-									apartment.photos.length > 1 && (
-										<div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs rounded-full px-2 py-1">
-											+{apartment.photos.length - 1} more
-										</div>
-									)}
 								<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
 									<h3 className="text-xl font-bold text-white mb-2">
 										{apartment.name}
